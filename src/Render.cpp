@@ -7,6 +7,7 @@
 #include <queue>
 #include <set>
 #include <algorithm>
+#include <numeric>
 
 SDL_Texture *texture = NULL;
 
@@ -172,6 +173,70 @@ void setDifficulty(SDL_Window *window, int &difficulty)
     generateMines(tiles);
 }
 
+bool checkChord(std::string &closed_tiles, int cols, int clickedIndex)
+{
+    int i = clickedIndex;
+    int number = closed_tiles[clickedIndex] - '0';
+    int count = 0;
+
+    if (i % cols != cols - 1)
+        count += closed_tiles[i + 1] == 'f' ? 1 : 0; // sağ
+    if (i % cols != 0 && i != 0)
+        count += closed_tiles[i - 1] == 'f' ? 1 : 0; // sol
+    if (i + cols < rows * cols)
+        count += closed_tiles[i + cols] == 'f' ? 1 : 0; // aşağı
+    if (i - cols >= 0)
+        count += closed_tiles[i - cols] == 'f' ? 1 : 0; // yukarı
+    if ((i % cols != 0 && i - cols >= 0 && i != 0))
+        count += closed_tiles[i - (cols + 1)] == 'f' ? 1 : 0; // sol yukarı
+    if ((i % cols != 0 && i + cols < rows * cols && i != 0))
+        count += closed_tiles[i + (cols - 1)] == 'f' ? 1 : 0; // sol aşağı
+    if ((i % cols != cols - 1 && i - cols >= 0))
+        count += closed_tiles[i - (cols - 1)] == 'f' ? 1 : 0; // sağ yukarı
+    if ((i % cols != cols - 1 && i + cols < rows * cols))
+        count += closed_tiles[i + (cols + 1)] == 'f' ? 1 : 0; // sağ aşağı
+
+    return number == count;
+}
+
+size_t chord(std::string &closed_tiles, int cols, int clickedIndex)
+{
+    int i = clickedIndex;
+    if (i % cols != cols - 1)
+        if (closed_tiles[i + 1] != 'f')
+            closed_tiles[i + 1] = tiles[i + 1]; // sağ
+    if (i % cols != 0 && i != 0)
+        if (closed_tiles[i - 1] != 'f')
+            closed_tiles[i - 1] = tiles[i - 1]; // sol
+    if (i + cols < rows * cols)
+        if (closed_tiles[i + cols] != 'f')
+            closed_tiles[i + cols] = tiles[i + cols]; // aşağı
+    if (i - cols >= 0)
+        if (closed_tiles[i - cols] != 'f')
+            closed_tiles[i - cols] = tiles[i - cols]; // yukarı
+    if ((i % cols != 0 && i - cols >= 0 && i != 0))
+        if (closed_tiles[i - (cols + 1)] != 'f')
+            closed_tiles[i - (cols + 1)] = tiles[i - (cols + 1)]; // sol yukarı
+    if ((i % cols != 0 && i + cols < rows * cols && i != 0))
+        if (closed_tiles[i + (cols - 1)] != 'f')
+            closed_tiles[i + (cols - 1)] = tiles[i + (cols - 1)]; // sol aşağı
+    if ((i % cols != cols - 1 && i - cols >= 0))
+        if (closed_tiles[i - (cols - 1)] != 'f')
+            closed_tiles[i - (cols - 1)] = tiles[i - (cols - 1)]; // sağ yukarı
+    if ((i % cols != cols - 1 && i + cols < rows * cols))
+        if (closed_tiles[i + (cols + 1)] != 'f')
+            closed_tiles[i + (cols + 1)] = tiles[i + (cols + 1)]; // sağ aşağı
+
+    size_t found = closed_tiles.find('0');
+    while (found != std::string::npos)
+    { // Continue until no occurrence is found
+        zeroSpread(tiles, closed_tiles, cols, rows, (int)found);
+        found = closed_tiles.find('0', found + 1); // Find the next occurrence starting from the next position
+    }
+
+    return closed_tiles.find('m');
+}
+
 float second_counter = 0.f;
 int second = 0;
 bool paused = true;
@@ -179,6 +244,8 @@ bool lost = false;
 bool won = false;
 
 bool atlasFail = false;
+
+std::unordered_map<Uint8, bool> buttonStates;
 
 void App::Setup()
 {
@@ -191,7 +258,6 @@ void App::Setup()
         atlasFail = true;
         SetStringTextureColorMode({255, 50, 50});
     }
-    
 
     generateMines(tiles);
 }
@@ -230,7 +296,31 @@ void App::Update(SDL_Event &event, bool &quit, float deltaTime)
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
             float mouseX, mouseY;
             SDL_GetMouseState(&mouseX, &mouseY);
-            if (event.button.button == SDL_BUTTON_LEFT)
+            buttonStates[event.button.button] = true;
+            if (buttonStates[SDL_BUTTON_LEFT] && buttonStates[SDL_BUTTON_RIGHT])
+            {
+                for (size_t i = 0; i < tiles.size(); i++)
+                {
+                    auto index = get2DIndex((int)i, cols);
+                    SDL_FRect rect = {location.x + index.second * tileSize, location.y + index.first * tileSize, tileSize, tileSize};
+                    if (IsMouseInsideRect(mouseX, mouseY, rect))
+                    {
+                        if (checkChord(closed_tiles, cols, (int)i))
+                        {
+                            size_t found = chord(closed_tiles, cols, (int)i);
+                            if (found != std::string::npos)
+                            {
+                                closed_tiles = tiles;
+                                closed_tiles[found] = 'x';
+
+                                lost = true;
+                                paused = true;
+                            }
+                        }
+                    }
+                }
+            }
+            else if (buttonStates[SDL_BUTTON_LEFT])
             {
                 if (IsMouseInsideRect(mouseX, mouseY, {(WINDOW_WIDTH - 28) / 2, 10, 28, 28}))
                 {
@@ -251,23 +341,21 @@ void App::Update(SDL_Event &event, bool &quit, float deltaTime)
                     {
                         if (paused && !lost)
                             paused = false;
+
+                        if (closed_tiles == std::string(rows * cols, 'c'))
+                        {
+                            SDL_Log("Started!");
+                            while (tiles[i] != '0')
+                            {
+                                generateMines(tiles);
+                            }
+                            zeroSpread(tiles, closed_tiles, cols, rows, (int)i);
+                            closed_tiles[i] = tiles[i];
+
+                            return;
+                        }
                         if (tiles[i] == 'm')
                         {
-                            if (closed_tiles == std::string(rows * cols, 'c'))
-                            {
-                                while (tiles[i] == 'm')
-                                {
-                                    generateMines(tiles);
-                                }
-                                closed_tiles[i] = tiles[i];
-                                if (tiles[i] == '0')
-                                {
-                                    zeroSpread(tiles, closed_tiles, cols, rows, (int)i);
-                                    closed_tiles[i] = tiles[i];
-                                    return;
-                                }
-                                return;
-                            }
                             closed_tiles = tiles;
                             closed_tiles[i] = 'x';
 
@@ -287,7 +375,7 @@ void App::Update(SDL_Event &event, bool &quit, float deltaTime)
                     }
                 }
             }
-            else if (event.button.button == SDL_BUTTON_RIGHT)
+            else if (buttonStates[SDL_BUTTON_RIGHT])
             {
                 if (IsMouseInsideRect(mouseX, mouseY, {(WINDOW_WIDTH - 28) / 2, 10, 28, 28}))
                 {
@@ -310,11 +398,41 @@ void App::Update(SDL_Event &event, bool &quit, float deltaTime)
                         {
                             closed_tiles[i] = 'f';
                         }
+                        else if (closed_tiles[i] == 'f')
+                        {
+                            closed_tiles[i] = 'c';
+                        }
+                    }
+                }
+            }
+            else if (event.button.button == SDL_BUTTON_MIDDLE)
+            {
+                for (size_t i = 0; i < tiles.size(); i++)
+                {
+                    auto index = get2DIndex((int)i, cols);
+                    SDL_FRect rect = {location.x + index.second * tileSize, location.y + index.first * tileSize, tileSize, tileSize};
+                    if (IsMouseInsideRect(mouseX, mouseY, rect))
+                    {
+                        if (checkChord(closed_tiles, cols, (int)i))
+                        {
+                            size_t found = chord(closed_tiles, cols, (int)i);
+                            if (found != std::string::npos)
+                            {
+                                closed_tiles = tiles;
+                                closed_tiles[found] = 'x';
+
+                                lost = true;
+                                paused = true;
+                            }
+                        }
                     }
                 }
             }
 
             flags = bombCount - (int)std::count(closed_tiles.begin(), closed_tiles.end(), 'f');
+            break;
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+            buttonStates[event.button.button] = false;
             break;
         }
     }
@@ -327,7 +445,13 @@ void App::Update(SDL_Event &event, bool &quit, float deltaTime)
             second_counter -= 1.f;
             second++;
 
-            if (closed_tiles.find('c') == std::string::npos)
+            auto n = std::inner_product(std::begin(tiles), std::end(tiles),
+                                        std::begin(closed_tiles),
+                                        size_t(0),
+                                        std::plus<>(),
+                                        std::not_equal_to<>());
+
+            if (n == bombCount)
             {
                 paused = true;
                 won = true;
