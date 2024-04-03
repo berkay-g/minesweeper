@@ -341,12 +341,16 @@ void App::Update(SDL_Event &event, bool &quit, float deltaTime)
 
                     if (IsMouseInsideRect(mouseX, mouseY, rect))
                     {
+
+                        if (closed_tiles[i] == 'f')
+                            return;
+
                         if (paused && !lost)
                             paused = false;
 
-                        if (closed_tiles == std::string(rows * cols, 'c'))
+                        if (std::count(closed_tiles.begin(), closed_tiles.end(), 'f') + std::count(closed_tiles.begin(), closed_tiles.end(), 'c') == rows*cols)
                         {
-                            SDL_Log("Started!");
+                            std::replace(closed_tiles.begin(), closed_tiles.end(), 'f', 'c');
                             while (tiles[i] != '0')
                             {
                                 generateMines(tiles);
@@ -389,6 +393,9 @@ void App::Update(SDL_Event &event, bool &quit, float deltaTime)
                     second = 0;
                     second_counter = 0;
                 }
+
+                if (won)
+                    return;
 
                 for (size_t i = 0; i < tiles.size(); i++)
                 {
@@ -439,7 +446,7 @@ void App::Update(SDL_Event &event, bool &quit, float deltaTime)
         }
     }
 
-    if (!paused)
+    if (!paused && !won && !lost)
     {
         second_counter += deltaTime;
         if (second_counter >= 1.f)
@@ -455,7 +462,7 @@ void App::Update(SDL_Event &event, bool &quit, float deltaTime)
 
             if (n == bombCount)
             {
-                std::replace(closed_tiles.begin(),closed_tiles.end(), 'c', 'f');
+                std::replace(closed_tiles.begin(), closed_tiles.end(), 'c', 'f');
                 paused = true;
                 won = true;
             }
