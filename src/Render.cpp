@@ -302,7 +302,8 @@ void App::Update(SDL_Event &event, bool &quit, float deltaTime)
                 for (size_t i = 0; i < tiles.size(); i++)
                 {
                     auto index = get2DIndex((int)i, cols);
-                    SDL_FRect rect = {location.x + index.second * tileSize, location.y + index.first * tileSize, tileSize, tileSize};
+                    SDL_FRect rect = {1 + location.x + index.second * tileSize, 1 + location.y + index.first * tileSize, tileSize - 1, tileSize - 1};
+
                     if (IsMouseInsideRect(mouseX, mouseY, rect))
                     {
                         if (checkChord(closed_tiles, cols, (int)i))
@@ -336,7 +337,8 @@ void App::Update(SDL_Event &event, bool &quit, float deltaTime)
                 for (size_t i = 0; i < tiles.size(); i++)
                 {
                     auto index = get2DIndex((int)i, cols);
-                    SDL_FRect rect = {location.x + index.second * tileSize, location.y + index.first * tileSize, tileSize, tileSize};
+                    SDL_FRect rect = {1 + location.x + index.second * tileSize, 1 + location.y + index.first * tileSize, tileSize - 1, tileSize - 1};
+
                     if (IsMouseInsideRect(mouseX, mouseY, rect))
                     {
                         if (paused && !lost)
@@ -391,7 +393,7 @@ void App::Update(SDL_Event &event, bool &quit, float deltaTime)
                 for (size_t i = 0; i < tiles.size(); i++)
                 {
                     auto index = get2DIndex((int)i, cols);
-                    SDL_FRect rect = {location.x + index.second * tileSize, location.y + index.first * tileSize, tileSize, tileSize};
+                    SDL_FRect rect = {1 + location.x + index.second * tileSize, 1 + location.y + index.first * tileSize, tileSize - 1, tileSize - 1};
                     if (IsMouseInsideRect(mouseX, mouseY, rect))
                     {
                         if (closed_tiles[i] == 'c')
@@ -410,7 +412,7 @@ void App::Update(SDL_Event &event, bool &quit, float deltaTime)
                 for (size_t i = 0; i < tiles.size(); i++)
                 {
                     auto index = get2DIndex((int)i, cols);
-                    SDL_FRect rect = {location.x + index.second * tileSize, location.y + index.first * tileSize, tileSize, tileSize};
+                    SDL_FRect rect = {1 + location.x + index.second * tileSize, 1 + location.y + index.first * tileSize, tileSize - 1, tileSize - 1};
                     if (IsMouseInsideRect(mouseX, mouseY, rect))
                     {
                         if (checkChord(closed_tiles, cols, (int)i))
@@ -453,6 +455,7 @@ void App::Update(SDL_Event &event, bool &quit, float deltaTime)
 
             if (n == bombCount)
             {
+                std::replace(closed_tiles.begin(),closed_tiles.end(), 'c', 'f');
                 paused = true;
                 won = true;
             }
