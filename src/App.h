@@ -58,12 +58,12 @@ public:
     const bool IsMouseInsideRect(float mouseX, float mouseY, const SDL_FRect &rect);
 
 private:
-    SDL_Window *window{};
-    SDL_Renderer *renderer{};
+    SDL_Window *window;
+    SDL_Renderer *renderer;
     const char *window_title;
     int initial_window_width, initial_window_height;
     int window_width, window_height;
-    float scale_factor_x{}, scale_factor_y{}, scale_factor{};
+    float scale_factor_x, scale_factor_y, scale_factor;
     bool isMouseHidden;
 
     SDL_Texture *font;
