@@ -202,7 +202,7 @@ void App::DrawString(const std::string &str, const SDL_FRect &dimensions)
     }
 }
 
-void App::SetStringTextureColorMode(const Color& color)
+void App::SetStringTextureColorMode(const Color &color)
 {
     SDL_SetTextureColorMod(font, color.r, color.g, color.b);
 }
@@ -218,7 +218,7 @@ int App::SetRenderDrawColor(Color color)
     return SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 }
 
-App::Texture::Texture(const char* filename, SDL_Renderer* renderer, SDL_PixelFormatEnum pixelFormat)
+App::Texture::Texture(const char *filename, SDL_Renderer *renderer)
 {
     SDL_Surface *surface = NULL;
     texture = NULL;
@@ -227,12 +227,25 @@ App::Texture::Texture(const char* filename, SDL_Renderer* renderer, SDL_PixelFor
     if (!data)
         return;
 
-
     int pitch;
     pitch = width * bytesPerPixel;
     pitch = (pitch + 3) & ~3;
 
-    surface = SDL_CreateSurfaceFrom(data, width, height, pitch, pixelFormat);
+    int32_t Rmask, Gmask, Bmask, Amask;
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+    Rmask = 0x000000FF;
+    Gmask = 0x0000FF00;
+    Bmask = 0x00FF0000;
+    Amask = (bytesPerPixel == 4) ? 0xFF000000 : 0;
+#else
+    int s = (bytesPerPixel == 4) ? 0 : 8;
+    Rmask = 0xFF000000 >> s;
+    Gmask = 0x00FF0000 >> s;
+    Bmask = 0x0000FF00 >> s;
+    Amask = 0x000000FF >> s;
+#endif
+
+    surface = SDL_CreateSurfaceFrom(data, width, height, pitch, SDL_GetPixelFormatEnumForMasks(bytesPerPixel * 8, Rmask, Gmask, Bmask, Amask));
     texture = SDL_CreateTextureFromSurface(renderer, surface);
 
     if (!texture)
@@ -242,7 +255,7 @@ App::Texture::Texture(const char* filename, SDL_Renderer* renderer, SDL_PixelFor
     SDL_DestroySurface(surface);
 }
 
-App::Texture::Texture(const unsigned char* imageData, int imageDataSize, SDL_Renderer* renderer, SDL_PixelFormatEnum pixelFormat)
+App::Texture::Texture(const unsigned char *imageData, int imageDataSize, SDL_Renderer *renderer)
 {
     SDL_Surface *surface = NULL;
     texture = NULL;
@@ -251,12 +264,25 @@ App::Texture::Texture(const unsigned char* imageData, int imageDataSize, SDL_Ren
     if (!data)
         return;
 
-
     int pitch;
     pitch = width * bytesPerPixel;
     pitch = (pitch + 3) & ~3;
 
-    surface = SDL_CreateSurfaceFrom(data, width, height, pitch, pixelFormat);
+    int32_t Rmask, Gmask, Bmask, Amask;
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+    Rmask = 0x000000FF;
+    Gmask = 0x0000FF00;
+    Bmask = 0x00FF0000;
+    Amask = (bytesPerPixel == 4) ? 0xFF000000 : 0;
+#else
+    int s = (bytesPerPixel == 4) ? 0 : 8;
+    Rmask = 0xFF000000 >> s;
+    Gmask = 0x00FF0000 >> s;
+    Bmask = 0x0000FF00 >> s;
+    Amask = 0x000000FF >> s;
+#endif
+
+    surface = SDL_CreateSurfaceFrom(data, width, height, pitch, SDL_GetPixelFormatEnumForMasks(bytesPerPixel * 8, Rmask, Gmask, Bmask, Amask));
     texture = SDL_CreateTextureFromSurface(renderer, surface);
 
     if (!texture)

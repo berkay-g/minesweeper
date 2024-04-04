@@ -72,8 +72,8 @@ public:
     struct Texture
     {
         SDL_Texture *texture;
-        Texture(const char* filename, SDL_Renderer* renderer, SDL_PixelFormatEnum pixelFormat = SDL_PIXELFORMAT_ARGB8888);
-        Texture(const unsigned char* imageData, int imageDataSize, SDL_Renderer* renderer, SDL_PixelFormatEnum pixelFormat = SDL_PIXELFORMAT_ARGB8888);
+        Texture(const char* filename, SDL_Renderer* renderer);
+        Texture(const unsigned char* imageData, int imageDataSize, SDL_Renderer* renderer);
         ~Texture();
     };
 };

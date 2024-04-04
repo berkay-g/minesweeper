@@ -249,7 +249,7 @@ std::unordered_map<Uint8, bool> buttonStates;
 
 void App::Setup()
 {
-    static Texture atlas("atlas.png", renderer, SDL_PIXELFORMAT_RGB24);
+    static Texture atlas("atlas.png", renderer);
     texture = atlas.texture;
 
     if (!texture)
