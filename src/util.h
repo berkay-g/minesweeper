@@ -6,17 +6,19 @@ struct Vec2i
 {
     int x, y;
 
-    Vec2i operator+(Vec2i const& other)
+    Vec2i(int _x = 0, int _y = 0) : x(_x), y(_y) {}
+
+    Vec2i operator+(Vec2i const &other)
     {
         return Vec2i{x + other.x, y + other.y};
     }
 
-    bool operator==(Vec2i const& other)
+    bool operator==(Vec2i const &other)
     {
         return (x == other.x) && (y == other.y);
     }
 
-    bool operator!=(Vec2i const& other)
+    bool operator!=(Vec2i const &other)
     {
         return (x != other.x) && (y != other.y);
     }
@@ -26,17 +28,19 @@ struct Vec3i
 {
     int x, y, z;
 
-    Vec3i operator+(Vec3i const& other)
+    Vec3i(int _x = 0, int _y = 0, int _z = 0) : x(_x), y(_y), z(_z) {}
+
+    Vec3i operator+(Vec3i const &other)
     {
         return Vec3i{x + other.x, y + other.y, z + other.z};
     }
 
-    bool operator==(Vec3i const& other)
+    bool operator==(Vec3i const &other)
     {
         return (x == other.x) && (y == other.y) && (z == other.z);
     }
 
-    bool operator!=(Vec3i const& other)
+    bool operator!=(Vec3i const &other)
     {
         return (x != other.x) && (y != other.y) && (z != other.z);
     }
@@ -46,17 +50,19 @@ struct Vec2f
 {
     float x, y;
 
-    Vec2f operator+(Vec2f const& other)
+    Vec2f(float _x = 0.f, float _y = 0.f) : x(_x), y(_y) {}
+
+    Vec2f operator+(Vec2f const &other)
     {
         return Vec2f{x + other.x, y + other.y};
     }
 
-    bool operator==(Vec2f const& other)
+    bool operator==(Vec2f const &other)
     {
         return (x == other.x) && (y == other.y);
     }
 
-    bool operator!=(Vec2f const& other)
+    bool operator!=(Vec2f const &other)
     {
         return (x != other.x) && (y != other.y);
     }
