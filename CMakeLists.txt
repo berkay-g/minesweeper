@@ -35,6 +35,7 @@ function(copy_png TARGET_NAME PNG_FILE)
         DEPENDS ${PNG_FILE}
     )
 endfunction()
+
 copy_png(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/src/atlas.png)
 
 if (MSVC)

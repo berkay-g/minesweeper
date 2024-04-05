@@ -17,9 +17,9 @@ int EventFilter(void *userdata, SDL_Event *event)
     return 1;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    App app("Minesweeper", 825, 525, SDL_INIT_VIDEO, 0);
+    App app("Minesweeper", 825, 525, SDL_INIT_VIDEO, 0, argv[1]);
     app.SetWindowMinimumSize(825, 525);
     SDL_SetEventFilter(EventFilter, &app);
 

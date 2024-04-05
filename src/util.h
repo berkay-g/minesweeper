@@ -10,7 +10,7 @@ struct Vec2i
 
     Vec2i operator+(Vec2i const &other)
     {
-        return Vec2i{x + other.x, y + other.y};
+        return Vec2i(x + other.x, y + other.y);
     }
 
     bool operator==(Vec2i const &other)
@@ -32,7 +32,7 @@ struct Vec3i
 
     Vec3i operator+(Vec3i const &other)
     {
-        return Vec3i{x + other.x, y + other.y, z + other.z};
+        return Vec3i(x + other.x, y + other.y, z + other.z);
     }
 
     bool operator==(Vec3i const &other)
@@ -54,7 +54,7 @@ struct Vec2f
 
     Vec2f operator+(Vec2f const &other)
     {
-        return Vec2f{x + other.x, y + other.y};
+        return Vec2f(x + other.x, y + other.y);
     }
 
     bool operator==(Vec2f const &other)
@@ -65,6 +65,28 @@ struct Vec2f
     bool operator!=(Vec2f const &other)
     {
         return (x != other.x) && (y != other.y);
+    }
+};
+
+struct Vec3f
+{
+    float x, y, z;
+
+    Vec3f(float _x = 0.f, float _y = 0.f, float _z = 0.f) : x(_x), y(_y), z(_z) {}
+
+    Vec3f operator+(Vec3f const &other)
+    {
+        return Vec3f(x + other.x, y + other.y, z + other.z);
+    }
+
+    bool operator==(Vec3f const &other)
+    {
+        return (x == other.x) && (y == other.y) && (z == other.z);
+    }
+
+    bool operator!=(Vec3f const &other)
+    {
+        return (x != other.x) && (y != other.y) && (z == other.z);
     }
 };
 
