@@ -19,14 +19,14 @@ Vec2f location = {(WINDOW_WIDTH - tileSize * cols) / 2, 90.f};
 int difficulty = 0;
 int flags = bombCount;
 
-std::string closed_tiles;
+std::string closedTiles;
 std::string tiles;
 std::unordered_map<char, std::pair<int, int>> tileTextureIndex = {
     {'c', {0, 0}}, {'o', {1, 0}}, {'m', {0, 2}}, {'x', {2, 2}}, {'f', {0, 1}}, {'0', {3, 2}}, {'1', {0, 3}}, {'2', {1, 3}}, {'3', {2, 3}}, {'4', {3, 3}}, {'5', {0, 4}}, {'6', {1, 4}}, {'7', {2, 4}}, {'8', {3, 4}}};
 
 void generateMines(std::string &tiles)
 {
-    closed_tiles.assign(rows * cols, 'c');
+    closedTiles.assign(rows * cols, 'c');
     tiles.assign(rows * cols, 'o');
 
     std::random_device dev;
@@ -79,7 +79,7 @@ void generateMines(std::string &tiles)
     flags = bombCount;
 }
 
-void drawMines(SDL_Renderer *renderer, std::string &tiles)
+void drawTiles(SDL_Renderer *renderer, std::string &tiles)
 {
     SDL_FRect rect;
     SDL_FRect srcrect;
@@ -95,7 +95,7 @@ void drawMines(SDL_Renderer *renderer, std::string &tiles)
     }
 }
 
-void zeroSpread(std::string &tiles, std::string &closed_tiles, int width, int height, int clickedIndex)
+void zeroSpread(std::string &tiles, std::string &closedTiles, int width, int height, int clickedIndex)
 {
     std::vector<int> directions = {-1, 0, 1};
     std::queue<std::pair<int, int>> q;
@@ -124,13 +124,13 @@ void zeroSpread(std::string &tiles, std::string &closed_tiles, int width, int he
                 {
                     if (tiles[newRow * width + newCol] == '0')
                     {
-                        closed_tiles[newRow * width + newCol] = tiles[newRow * width + newCol];
+                        closedTiles[newRow * width + newCol] = tiles[newRow * width + newCol];
                         q.push({newRow, newCol});
                         visited[newRow][newCol] = true;
                     }
                     else if (tiles[newRow * width + newCol] != 'm')
                     {
-                        closed_tiles[newRow * width + newCol] = tiles[newRow * width + newCol];
+                        closedTiles[newRow * width + newCol] = tiles[newRow * width + newCol];
                         visited[newRow][newCol] = true;
                     }
                 }
@@ -173,71 +173,71 @@ void setDifficulty(SDL_Window *window, int &difficulty)
     generateMines(tiles);
 }
 
-bool checkChord(std::string &closed_tiles, int cols, int clickedIndex)
+bool checkChord(std::string &closedTiles, int cols, int clickedIndex)
 {
     int i = clickedIndex;
-    int number = closed_tiles[clickedIndex] - '0';
+    int number = closedTiles[clickedIndex] - '0';
     int count = 0;
 
     if (i % cols != cols - 1)
-        count += closed_tiles[i + 1] == 'f' ? 1 : 0; // sağ
+        count += closedTiles[i + 1] == 'f' ? 1 : 0; // sağ
     if (i % cols != 0 && i != 0)
-        count += closed_tiles[i - 1] == 'f' ? 1 : 0; // sol
+        count += closedTiles[i - 1] == 'f' ? 1 : 0; // sol
     if (i + cols < rows * cols)
-        count += closed_tiles[i + cols] == 'f' ? 1 : 0; // aşağı
+        count += closedTiles[i + cols] == 'f' ? 1 : 0; // aşağı
     if (i - cols >= 0)
-        count += closed_tiles[i - cols] == 'f' ? 1 : 0; // yukarı
+        count += closedTiles[i - cols] == 'f' ? 1 : 0; // yukarı
     if ((i % cols != 0 && i - cols >= 0 && i != 0))
-        count += closed_tiles[i - (cols + 1)] == 'f' ? 1 : 0; // sol yukarı
+        count += closedTiles[i - (cols + 1)] == 'f' ? 1 : 0; // sol yukarı
     if ((i % cols != 0 && i + cols < rows * cols && i != 0))
-        count += closed_tiles[i + (cols - 1)] == 'f' ? 1 : 0; // sol aşağı
+        count += closedTiles[i + (cols - 1)] == 'f' ? 1 : 0; // sol aşağı
     if ((i % cols != cols - 1 && i - cols >= 0))
-        count += closed_tiles[i - (cols - 1)] == 'f' ? 1 : 0; // sağ yukarı
+        count += closedTiles[i - (cols - 1)] == 'f' ? 1 : 0; // sağ yukarı
     if ((i % cols != cols - 1 && i + cols < rows * cols))
-        count += closed_tiles[i + (cols + 1)] == 'f' ? 1 : 0; // sağ aşağı
+        count += closedTiles[i + (cols + 1)] == 'f' ? 1 : 0; // sağ aşağı
 
     return number == count;
 }
 
-size_t chord(std::string &closed_tiles, int cols, int clickedIndex)
+size_t chord(std::string &closedTiles, int cols, int clickedIndex)
 {
     int i = clickedIndex;
     if (i % cols != cols - 1)
-        if (closed_tiles[i + 1] != 'f')
-            closed_tiles[i + 1] = tiles[i + 1]; // sağ
+        if (closedTiles[i + 1] != 'f')
+            closedTiles[i + 1] = tiles[i + 1]; // sağ
     if (i % cols != 0 && i != 0)
-        if (closed_tiles[i - 1] != 'f')
-            closed_tiles[i - 1] = tiles[i - 1]; // sol
+        if (closedTiles[i - 1] != 'f')
+            closedTiles[i - 1] = tiles[i - 1]; // sol
     if (i + cols < rows * cols)
-        if (closed_tiles[i + cols] != 'f')
-            closed_tiles[i + cols] = tiles[i + cols]; // aşağı
+        if (closedTiles[i + cols] != 'f')
+            closedTiles[i + cols] = tiles[i + cols]; // aşağı
     if (i - cols >= 0)
-        if (closed_tiles[i - cols] != 'f')
-            closed_tiles[i - cols] = tiles[i - cols]; // yukarı
+        if (closedTiles[i - cols] != 'f')
+            closedTiles[i - cols] = tiles[i - cols]; // yukarı
     if ((i % cols != 0 && i - cols >= 0 && i != 0))
-        if (closed_tiles[i - (cols + 1)] != 'f')
-            closed_tiles[i - (cols + 1)] = tiles[i - (cols + 1)]; // sol yukarı
+        if (closedTiles[i - (cols + 1)] != 'f')
+            closedTiles[i - (cols + 1)] = tiles[i - (cols + 1)]; // sol yukarı
     if ((i % cols != 0 && i + cols < rows * cols && i != 0))
-        if (closed_tiles[i + (cols - 1)] != 'f')
-            closed_tiles[i + (cols - 1)] = tiles[i + (cols - 1)]; // sol aşağı
+        if (closedTiles[i + (cols - 1)] != 'f')
+            closedTiles[i + (cols - 1)] = tiles[i + (cols - 1)]; // sol aşağı
     if ((i % cols != cols - 1 && i - cols >= 0))
-        if (closed_tiles[i - (cols - 1)] != 'f')
-            closed_tiles[i - (cols - 1)] = tiles[i - (cols - 1)]; // sağ yukarı
+        if (closedTiles[i - (cols - 1)] != 'f')
+            closedTiles[i - (cols - 1)] = tiles[i - (cols - 1)]; // sağ yukarı
     if ((i % cols != cols - 1 && i + cols < rows * cols))
-        if (closed_tiles[i + (cols + 1)] != 'f')
-            closed_tiles[i + (cols + 1)] = tiles[i + (cols + 1)]; // sağ aşağı
+        if (closedTiles[i + (cols + 1)] != 'f')
+            closedTiles[i + (cols + 1)] = tiles[i + (cols + 1)]; // sağ aşağı
 
-    size_t found = closed_tiles.find('0');
+    size_t found = closedTiles.find('0');
     while (found != std::string::npos)
     { // Continue until no occurrence is found
-        zeroSpread(tiles, closed_tiles, cols, rows, (int)found);
-        found = closed_tiles.find('0', found + 1); // Find the next occurrence starting from the next position
+        zeroSpread(tiles, closedTiles, cols, rows, (int)found);
+        found = closedTiles.find('0', found + 1); // Find the next occurrence starting from the next position
     }
 
-    return closed_tiles.find('m');
+    return closedTiles.find('m');
 }
 
-float second_counter = 0.f;
+float secondCounter = 0.f;
 int second = 0;
 bool paused = true;
 bool lost = false;
@@ -283,7 +283,7 @@ void App::Update(SDL_Event &event, float deltaTime)
                 won = false;
                 paused = true;
                 second = 0;
-                second_counter = 0;
+                secondCounter = 0;
                 SDL_Log("fps = %f", 1 / deltaTime);
             }
             else if (event.key.keysym.sym == SDLK_v)
@@ -293,31 +293,80 @@ void App::Update(SDL_Event &event, float deltaTime)
             }
 
             break;
-        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        case SDL_EVENT_MOUSE_MOTION:
             float mouseX, mouseY;
             SDL_GetMouseState(&mouseX, &mouseY);
+            if (event.button.button == SDL_BUTTON_MIDDLE || (buttonStates[SDL_BUTTON_LEFT] && buttonStates[SDL_BUTTON_RIGHT]))
+            {
+                std::replace(closedTiles.begin(), closedTiles.end(), 'o', 'c');
+                for (size_t i = 0; i < tiles.size(); i++)
+                {
+                    auto index = get2DIndex((int)i, cols);
+                    SDL_FRect rect = {1 + location.x + index.second * tileSize, 1 + location.y + index.first * tileSize, tileSize - 1, tileSize - 1};
+                    if (IsMouseInsideRect(mouseX, mouseY, rect))
+                    {
+                        closedTiles[i] = closedTiles[i] == 'c' ? 'o' : closedTiles[i];
+                        if (i % cols != cols - 1)
+                            closedTiles[i + 1] = closedTiles[i + 1] == 'c' ? 'o' : closedTiles[i + 1]; // sağ
+                        if (i % cols != 0 && i != 0)
+                            closedTiles[i - 1] = closedTiles[i - 1] == 'c' ? 'o' : closedTiles[i - 1]; // sol
+                        if (i + cols < rows * cols)
+                            closedTiles[i + cols] = closedTiles[i + cols] == 'c' ? 'o' : closedTiles[i + cols]; // aşağı
+                        if (i - cols >= 0)
+                            closedTiles[i - cols] = closedTiles[i - cols] == 'c' ? 'o' : closedTiles[i - cols]; // yukarı
+                        if ((i % cols != 0 && i - cols >= 0 && i != 0))
+                            closedTiles[i - (cols + 1)] = closedTiles[i - (cols + 1)] == 'c' ? 'o' : closedTiles[i - (cols + 1)]; // sol yukarı
+                        if ((i % cols != 0 && i + cols < rows * cols && i != 0))
+                            closedTiles[i + (cols - 1)] = closedTiles[i + (cols - 1)] == 'c' ? 'o' : closedTiles[i + (cols - 1)]; // sol aşağı
+                        if ((i % cols != cols - 1 && i - cols >= 0))
+                            closedTiles[i - (cols - 1)] = closedTiles[i - (cols - 1)] == 'c' ? 'o' : closedTiles[i - (cols - 1)]; // sağ yukarı
+                        if ((i % cols != cols - 1 && i + cols < rows * cols))
+                            closedTiles[i + (cols + 1)] = closedTiles[i + (cols + 1)] == 'c' ? 'o' : closedTiles[i + (cols + 1)]; // sağ aşağı
+                    }
+                }
+            }
+            break;
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            SDL_GetMouseState(&mouseX, &mouseY);
             buttonStates[event.button.button] = true;
-            if (buttonStates[SDL_BUTTON_LEFT] && buttonStates[SDL_BUTTON_RIGHT])
+            if (event.button.button == SDL_BUTTON_MIDDLE || (buttonStates[SDL_BUTTON_LEFT] && buttonStates[SDL_BUTTON_RIGHT]))
             {
                 for (size_t i = 0; i < tiles.size(); i++)
                 {
                     auto index = get2DIndex((int)i, cols);
                     SDL_FRect rect = {1 + location.x + index.second * tileSize, 1 + location.y + index.first * tileSize, tileSize - 1, tileSize - 1};
-
                     if (IsMouseInsideRect(mouseX, mouseY, rect))
                     {
-                        if (checkChord(closed_tiles, cols, (int)i))
+                        if (checkChord(closedTiles, cols, (int)i))
                         {
-                            size_t found = chord(closed_tiles, cols, (int)i);
+                            size_t found = chord(closedTiles, cols, (int)i);
                             if (found != std::string::npos)
                             {
-                                closed_tiles = tiles;
-                                closed_tiles[found] = 'x';
+                                closedTiles = tiles;
+                                closedTiles[found] = 'x';
 
                                 lost = true;
                                 paused = true;
                             }
+                            return;
                         }
+                        closedTiles[i] = closedTiles[i] == 'c' ? 'o' : closedTiles[i];
+                        if (i % cols != cols - 1)
+                            closedTiles[i + 1] = closedTiles[i + 1] == 'c' ? 'o' : closedTiles[i + 1]; // sağ
+                        if (i % cols != 0 && i != 0)
+                            closedTiles[i - 1] = closedTiles[i - 1] == 'c' ? 'o' : closedTiles[i - 1]; // sol
+                        if (i + cols < rows * cols)
+                            closedTiles[i + cols] = closedTiles[i + cols] == 'c' ? 'o' : closedTiles[i + cols]; // aşağı
+                        if (i - cols >= 0)
+                            closedTiles[i - cols] = closedTiles[i - cols] == 'c' ? 'o' : closedTiles[i - cols]; // yukarı
+                        if ((i % cols != 0 && i - cols >= 0 && i != 0))
+                            closedTiles[i - (cols + 1)] = closedTiles[i - (cols + 1)] == 'c' ? 'o' : closedTiles[i - (cols + 1)]; // sol yukarı
+                        if ((i % cols != 0 && i + cols < rows * cols && i != 0))
+                            closedTiles[i + (cols - 1)] = closedTiles[i + (cols - 1)] == 'c' ? 'o' : closedTiles[i + (cols - 1)]; // sol aşağı
+                        if ((i % cols != cols - 1 && i - cols >= 0))
+                            closedTiles[i - (cols - 1)] = closedTiles[i - (cols - 1)] == 'c' ? 'o' : closedTiles[i - (cols - 1)]; // sağ yukarı
+                        if ((i % cols != cols - 1 && i + cols < rows * cols))
+                            closedTiles[i + (cols + 1)] = closedTiles[i + (cols + 1)] == 'c' ? 'o' : closedTiles[i + (cols + 1)]; // sağ aşağı
                     }
                 }
             }
@@ -330,7 +379,7 @@ void App::Update(SDL_Event &event, float deltaTime)
                     paused = true;
                     won = false;
                     second = 0;
-                    second_counter = 0;
+                    secondCounter = 0;
                     return;
                 }
 
@@ -342,28 +391,28 @@ void App::Update(SDL_Event &event, float deltaTime)
                     if (IsMouseInsideRect(mouseX, mouseY, rect))
                     {
 
-                        if (closed_tiles[i] == 'f')
+                        if (closedTiles[i] == 'f')
                             return;
 
                         if (paused && !lost)
                             paused = false;
 
-                        if (std::count(closed_tiles.begin(), closed_tiles.end(), 'f') + std::count(closed_tiles.begin(), closed_tiles.end(), 'c') == rows*cols)
+                        if (std::count(closedTiles.begin(), closedTiles.end(), 'f') + std::count(closedTiles.begin(), closedTiles.end(), 'c') == rows * cols)
                         {
-                            std::replace(closed_tiles.begin(), closed_tiles.end(), 'f', 'c');
+                            std::replace(closedTiles.begin(), closedTiles.end(), 'f', 'c');
                             while (tiles[i] != '0')
                             {
                                 generateMines(tiles);
                             }
-                            zeroSpread(tiles, closed_tiles, cols, rows, (int)i);
-                            closed_tiles[i] = tiles[i];
+                            zeroSpread(tiles, closedTiles, cols, rows, (int)i);
+                            closedTiles[i] = tiles[i];
 
                             return;
                         }
                         if (tiles[i] == 'm')
                         {
-                            closed_tiles = tiles;
-                            closed_tiles[i] = 'x';
+                            closedTiles = tiles;
+                            closedTiles[i] = 'x';
 
                             lost = true;
                             paused = true;
@@ -372,12 +421,12 @@ void App::Update(SDL_Event &event, float deltaTime)
 
                         if (tiles[i] == '0')
                         {
-                            zeroSpread(tiles, closed_tiles, cols, rows, (int)i);
-                            closed_tiles[i] = tiles[i];
+                            zeroSpread(tiles, closedTiles, cols, rows, (int)i);
+                            closedTiles[i] = tiles[i];
                             return;
                         }
 
-                        closed_tiles[i] = tiles[i];
+                        closedTiles[i] = tiles[i];
                     }
                 }
             }
@@ -391,7 +440,7 @@ void App::Update(SDL_Event &event, float deltaTime)
                     won = false;
                     paused = true;
                     second = 0;
-                    second_counter = 0;
+                    secondCounter = 0;
                 }
 
                 if (won)
@@ -403,44 +452,27 @@ void App::Update(SDL_Event &event, float deltaTime)
                     SDL_FRect rect = {1 + location.x + index.second * tileSize, 1 + location.y + index.first * tileSize, tileSize - 1, tileSize - 1};
                     if (IsMouseInsideRect(mouseX, mouseY, rect))
                     {
-                        if (closed_tiles[i] == 'c')
+                        if (closedTiles[i] == 'c')
                         {
-                            closed_tiles[i] = 'f';
+                            closedTiles[i] = 'f';
                         }
-                        else if (closed_tiles[i] == 'f')
+                        else if (closedTiles[i] == 'f')
                         {
-                            closed_tiles[i] = 'c';
-                        }
-                    }
-                }
-            }
-            else if (event.button.button == SDL_BUTTON_MIDDLE)
-            {
-                for (size_t i = 0; i < tiles.size(); i++)
-                {
-                    auto index = get2DIndex((int)i, cols);
-                    SDL_FRect rect = {1 + location.x + index.second * tileSize, 1 + location.y + index.first * tileSize, tileSize - 1, tileSize - 1};
-                    if (IsMouseInsideRect(mouseX, mouseY, rect))
-                    {
-                        if (checkChord(closed_tiles, cols, (int)i))
-                        {
-                            size_t found = chord(closed_tiles, cols, (int)i);
-                            if (found != std::string::npos)
-                            {
-                                closed_tiles = tiles;
-                                closed_tiles[found] = 'x';
-
-                                lost = true;
-                                paused = true;
-                            }
+                            closedTiles[i] = 'c';
                         }
                     }
                 }
             }
 
-            flags = bombCount - (int)std::count(closed_tiles.begin(), closed_tiles.end(), 'f');
+            flags = bombCount - (int)std::count(closedTiles.begin(), closedTiles.end(), 'f');
             break;
         case SDL_EVENT_MOUSE_BUTTON_UP:
+            SDL_GetMouseState(&mouseX, &mouseY);
+            if (event.button.button == SDL_BUTTON_MIDDLE || (buttonStates[SDL_BUTTON_LEFT] && buttonStates[SDL_BUTTON_RIGHT]))
+            {
+                std::replace(closedTiles.begin(), closedTiles.end(), 'o', 'c');
+            }
+
             buttonStates[event.button.button] = false;
             break;
         }
@@ -448,23 +480,24 @@ void App::Update(SDL_Event &event, float deltaTime)
 
     if (!paused && !won && !lost)
     {
-        second_counter += deltaTime;
-        if (second_counter >= 1.f)
+        secondCounter += deltaTime;
+        if (secondCounter >= 1.f)
         {
-            second_counter -= 1.f;
+            secondCounter -= 1.f;
             second++;
 
             auto n = std::inner_product(std::begin(tiles), std::end(tiles),
-                                        std::begin(closed_tiles),
+                                        std::begin(closedTiles),
                                         size_t(0),
                                         std::plus<>(),
                                         std::not_equal_to<>());
 
             if (n == bombCount)
             {
-                std::replace(closed_tiles.begin(), closed_tiles.end(), 'c', 'f');
+                std::replace(closedTiles.begin(), closedTiles.end(), 'c', 'f');
                 paused = true;
                 won = true;
+                flags = 0;
             }
         }
     }
@@ -478,11 +511,11 @@ void App::Draw()
 
     DrawString(std::to_string(flags), {75, 10, 30, 30});
     DrawString(std::to_string(second), {750, 10, 30, 30});
-    SDL_FRect rect{(WINDOW_WIDTH - 28) / 2, 10, 28, 28};
+    SDL_FRect rect = {(WINDOW_WIDTH - 28) / 2, 10, 28, 28};
     SDL_FRect srcrect = {won ? 0 : (lost ? 1 : 3) * 512.f, (won ? 2 : (lost ? 2 : 0)) * 512.f, 512.f, 512.f};
     SDL_RenderTexture(renderer, texture, &srcrect, &rect);
 
-    drawMines(renderer, closed_tiles);
+    drawTiles(renderer, closedTiles);
 
     if (atlasFail)
         DrawString("Unable to load atlas.png", {50, 50, 30, 30});
