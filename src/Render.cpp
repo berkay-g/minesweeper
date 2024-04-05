@@ -262,7 +262,7 @@ void App::Setup()
     generateMines(tiles);
 }
 
-void App::Update(SDL_Event &event, bool &quit, float deltaTime)
+void App::Update(SDL_Event &event, float deltaTime)
 {
     while (SDL_PollEvent(&event))
     {
@@ -270,11 +270,11 @@ void App::Update(SDL_Event &event, bool &quit, float deltaTime)
         switch (event.type)
         {
         case SDL_EVENT_QUIT:
-            quit = 1;
+            quit = true;
             break;
         case SDL_EVENT_KEY_DOWN:
             if (event.key.keysym.sym == SDLK_ESCAPE)
-                quit = 1;
+                quit = true;
 
             else if (event.key.keysym.sym == SDLK_k)
             {

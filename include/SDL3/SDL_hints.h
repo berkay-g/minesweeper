@@ -40,6 +40,7 @@
 #define SDL_hints_h_
 
 #include <SDL3/SDL_stdinc.h>
+#include <SDL3/SDL_error.h>
 
 #include <SDL3/SDL_begin_code.h>
 /* Set up for C function definitions, even when using C++ */
@@ -414,6 +415,26 @@ extern "C" {
 #define SDL_HINT_JOYSTICK_DIRECTINPUT "SDL_JOYSTICK_DIRECTINPUT"
 
 /**
+ * A variable that specifies a dialog backend to use.
+ *
+ * By default, SDL will try all available dialog backends in a reasonable order until it finds one that can work, but this hint allows the app or user to force a specific target.
+ *
+ * If the specified target does not exist or is not available, the dialog-related function calls will fail.
+ *
+ * This hint currently only applies to platforms using the generic "Unix" dialog implementation, but may be extended to more platforms in the future. Note that some Unix and Unix-like platforms have their own implementation, such as macOS and Haiku.
+ *
+ * The variable can be set to the following values:
+ *   NULL          - Select automatically (default, all platforms)
+ *   "portal"      - Use XDG Portals through DBus (Unix only)
+ *   "zenity"      - Use the Zenity program (Unix only)
+ *
+ * More options may be added in the future.
+ *
+ * This hint can be set anytime.
+ */
+#define SDL_HINT_FILE_DIALOG_DRIVER "SDL_FILE_DIALOG_DRIVER"
+
+/**
  * Override for SDL_GetDisplayUsableBounds()
  *
  * If set, this hint will override the expected results for SDL_GetDisplayUsableBounds() for display index 0. Generally you don't want to do this, but this allows an embedded system to request that some of the screen be reserved for other uses when paired with a well-behaved application.
@@ -503,7 +524,7 @@ extern "C" {
  *
  * This hint can be set anytime.
  */
-#define SDL_HINT_FORCE_RAISEWINDOW    "SDL_HINT_FORCE_RAISEWINDOW"
+#define SDL_HINT_FORCE_RAISEWINDOW    "SDL_FORCE_RAISEWINDOW"
 
 /**
  * A variable controlling how 3D acceleration is used to accelerate the SDL screen surface.
@@ -1690,7 +1711,7 @@ extern "C" {
  *
  * This hint can be set anytime.
  */
-#define SDL_HINT_PEN_DELAY_MOUSE_BUTTON    "SDL_HINT_PEN_DELAY_MOUSE_BUTTON"
+#define SDL_HINT_PEN_DELAY_MOUSE_BUTTON    "SDL_PEN_DELAY_MOUSE_BUTTON"
 
 /**
  * A variable controlling whether to treat pen movement as separate from mouse movement
@@ -1707,7 +1728,7 @@ extern "C" {
  *
  * This hint can be set anytime.
  */
-#define SDL_HINT_PEN_NOT_MOUSE    "SDL_HINT_PEN_NOT_MOUSE"
+#define SDL_HINT_PEN_NOT_MOUSE    "SDL_PEN_NOT_MOUSE"
 
 /**
  * A variable controlling the use of a sentinel event when polling the event queue
@@ -2283,7 +2304,7 @@ extern "C" {
  *
  * This hint can be set anytime.
  */
-#define SDL_HINT_VITA_TOUCH_MOUSE_DEVICE    "SDL_HINT_VITA_TOUCH_MOUSE_DEVICE"
+#define SDL_HINT_VITA_TOUCH_MOUSE_DEVICE    "SDL_VITA_TOUCH_MOUSE_DEVICE"
 
 /**
  * A variable controlling how the fact chunk affects the loading of a WAVE file.

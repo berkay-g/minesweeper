@@ -19,8 +19,8 @@ int EventFilter(void *userdata, SDL_Event *event)
 
 int main()
 {
-    App app("Minesweeper", 825, 525, 0, SDL_RENDERER_ACCELERATED);
-    app.SetWindowMinimumSize(300, 300);
+    App app("Minesweeper", 825, 525, SDL_INIT_VIDEO, 0);
+    app.SetWindowMinimumSize(825, 525);
     SDL_SetEventFilter(EventFilter, &app);
 
     // ImGuiIO &io = app.ImguiInit();
@@ -36,14 +36,13 @@ int main()
     float deltaTime = 0;
 
     SDL_Event event;
-    bool quit = false;
-    while (!quit)
+    while (!app.quit)
     {
         LAST = NOW;
         NOW = SDL_GetPerformanceCounter();
         deltaTime = ((NOW - LAST) / (float)SDL_GetPerformanceFrequency());
 
-        app.Update(event, quit, deltaTime);
+        app.Update(event, deltaTime);
         app.Draw();
         SDL_framerateDelay(&fps);
     }
