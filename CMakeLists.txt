@@ -24,6 +24,19 @@ target_link_libraries(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/SDL3-static.lib wi
 # win32 shared
 # target_link_libraries(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/SDL3.lib)
 
+function(copy_png TARGET_NAME PNG_FILE)
+    add_custom_command(
+        TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${PNG_FILE}
+                $<TARGET_FILE_DIR:${TARGET_NAME}>
+        COMMENT "Copying ${PNG_FILE} to output directory"
+        VERBATIM
+        DEPENDS ${PNG_FILE}
+    )
+endfunction()
+copy_png(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/src/atlas.png)
+
 if (MSVC)
 	message("MSVC")
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
