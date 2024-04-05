@@ -278,13 +278,16 @@ void App::Update(SDL_Event &event, float deltaTime)
 
             else if (event.key.keysym.sym == SDLK_k)
             {
+                SDL_Log("fps = %f", 1 / deltaTime);
+            }
+            else if (event.key.keysym.sym == SDLK_F2)
+            {
                 generateMines(tiles);
                 lost = false;
                 won = false;
                 paused = true;
                 second = 0;
                 secondCounter = 0;
-                SDL_Log("fps = %f", 1 / deltaTime);
             }
             else if (event.key.keysym.sym == SDLK_v)
             {
