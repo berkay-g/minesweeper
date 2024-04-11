@@ -1,32 +1,43 @@
 #pragma once
 
+#include <chrono>
+
 class Delay
 {
 public:
-
-    float counter;
     float seconds;
+    std::chrono::steady_clock::time_point startTime;
     bool start;
-    
-    Delay(float seconds)
+
+    Delay(float seconds) : seconds(seconds), start(false) {}
+
+    void Start()
     {
-        this->seconds = seconds;
-        this->start = false;
-        this->counter = 0.f;
+        if (!start)
+        {
+            startTime = std::chrono::steady_clock::now();
+            start = true;
+        }
     }
 
-    bool Update(float deltaTime)
+    bool Update()
     {
-        if (this->start)
+        if (start)
         {
-            this->counter += deltaTime;
-            if (this->counter >= seconds)
+            auto currentTime = std::chrono::steady_clock::now();
+            auto elapsedTime = std::chrono::duration_cast<std::chrono::duration<float>>(currentTime - startTime).count();
+
+            if (elapsedTime >= seconds)
             {
-                counter -= seconds;
-                this->start = false;
+                start = false;
                 return true;
             }
         }
         return false;
+    }
+
+    float GetElapsedTime()
+    {
+        return std::chrono::duration_cast<std::chrono::duration<float>>(std::chrono::steady_clock::now() - startTime).count();
     }
 };

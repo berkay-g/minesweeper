@@ -1,4 +1,5 @@
 #include "App.h"
+#include "Delay.h"
 
 #include <string>
 #include <unordered_map>
@@ -237,8 +238,9 @@ size_t chord(std::string &closedTiles, int cols, int clickedIndex)
     return closedTiles.find('m');
 }
 
-float secondCounter = 0.f;
-int second = 0;
+Delay second(1.f);
+float secondCount = 0.f;
+
 bool paused = true;
 bool lost = false;
 bool won = false;
@@ -286,8 +288,8 @@ void App::Update(SDL_Event &event, float deltaTime)
                 lost = false;
                 won = false;
                 paused = true;
-                second = 0;
-                secondCounter = 0;
+                secondCount = 0;
+                second.start = false;
             }
             else if (event.key.keysym.sym == SDLK_v)
             {
@@ -302,7 +304,7 @@ void App::Update(SDL_Event &event, float deltaTime)
             if (event.button.button == SDL_BUTTON_MIDDLE || (buttonStates[SDL_BUTTON_LEFT] && buttonStates[SDL_BUTTON_RIGHT]))
             {
                 std::replace(closedTiles.begin(), closedTiles.end(), 'o', 'c');
-                for (size_t i = 0; i < tiles.size(); i++)
+                for (int i = 0; i < (int)tiles.size(); i++)
                 {
                     auto index = get2DIndex((int)i, cols);
                     SDL_FRect rect = {1 + location.x + index.second * tileSize, 1 + location.y + index.first * tileSize, tileSize - 1, tileSize - 1};
@@ -334,7 +336,7 @@ void App::Update(SDL_Event &event, float deltaTime)
             buttonStates[event.button.button] = true;
             if (event.button.button == SDL_BUTTON_MIDDLE || (buttonStates[SDL_BUTTON_LEFT] && buttonStates[SDL_BUTTON_RIGHT]))
             {
-                for (size_t i = 0; i < tiles.size(); i++)
+                for (int i = 0; i < (int)tiles.size(); i++)
                 {
                     auto index = get2DIndex((int)i, cols);
                     SDL_FRect rect = {1 + location.x + index.second * tileSize, 1 + location.y + index.first * tileSize, tileSize - 1, tileSize - 1};
@@ -381,8 +383,8 @@ void App::Update(SDL_Event &event, float deltaTime)
                     lost = false;
                     paused = true;
                     won = false;
-                    second = 0;
-                    secondCounter = 0;
+                    secondCount = 0;
+                    second.start = false;
                     return;
                 }
 
@@ -398,7 +400,10 @@ void App::Update(SDL_Event &event, float deltaTime)
                             return;
 
                         if (paused && !lost)
+                        {
+                            second.Start();
                             paused = false;
+                        }
 
                         if (std::count(closedTiles.begin(), closedTiles.end(), 'f') + std::count(closedTiles.begin(), closedTiles.end(), 'c') == rows * cols)
                         {
@@ -442,8 +447,8 @@ void App::Update(SDL_Event &event, float deltaTime)
                     lost = false;
                     won = false;
                     paused = true;
-                    second = 0;
-                    secondCounter = 0;
+                    secondCount = 0;
+                    second.start = false;
                 }
 
                 if (won)
@@ -483,11 +488,10 @@ void App::Update(SDL_Event &event, float deltaTime)
 
     if (!paused && !won && !lost)
     {
-        secondCounter += deltaTime;
-        if (secondCounter >= 1.f)
+        if (second.Update())
         {
-            secondCounter -= 1.f;
-            second++;
+            secondCount += second.GetElapsedTime();
+            second.Start();
 
             auto n = std::inner_product(std::begin(tiles), std::end(tiles),
                                         std::begin(closedTiles),
@@ -513,7 +517,7 @@ void App::Draw()
     SDL_RenderClear(renderer);
 
     DrawString(std::to_string(flags), {75, 10, 30, 30});
-    DrawString(std::to_string(second), {750, 10, 30, 30});
+    DrawString(std::to_string(static_cast<int>(secondCount)), {750, 10, 30, 30});
     SDL_FRect rect = {(WINDOW_WIDTH - 28) / 2, 10, 28, 28};
     SDL_FRect srcrect = {won ? 0 : (lost ? 1 : 3) * 512.f, (won ? 2 : (lost ? 2 : 0)) * 512.f, 512.f, 512.f};
     SDL_RenderTexture(renderer, texture, &srcrect, &rect);
